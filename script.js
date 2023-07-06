@@ -5,9 +5,20 @@ let backspace = document.querySelector('.backspace');
 let dot = document.querySelector('.dot-button');
 var digitButtons = document.querySelectorAll('.digit-button'); 
 
+let operand1 = '';
+let operator = '';
+let operand2 = '';
+let result;
+
+
 for (var i = 0; i < digitButtons.length; i++) {
     digitButtons[i].addEventListener('click', function(event) {
     var digit = event.currentTarget.textContent;
+
+    if (!operand2 && operator){
+        display.textContent = ''; //чтобы очистить экран после промежуточного результата
+    };
+
     display.textContent = display.textContent + digit;
     if (operand1 && operator) {
         operand2 = operand2 + digit;
@@ -28,17 +39,35 @@ for (var i = 0; i < digitButtons.length; i++) {
 var operatorButtons = document.querySelectorAll('.operator-button');
 for (var i = 0; i < operatorButtons.length; i++) {
     operatorButtons[i].addEventListener('click', function(event){
+        //если оператор кликнут больше 1 раза, 
+        //он должен подсчитать и вывести промежуточный результат
+        if (operator != '') {
+            makeResult();
+            display.textContent = result;
+            operand1 = result;
+            operand2 = '';
+        } else {
+            display.textContent = '';
+        }
         var currentOperator = event.currentTarget.textContent;
         operator = currentOperator;
-        display.textContent = '';
     })
 }
+
 
 let equal = document.querySelector('.equal');
 equal.addEventListener('click', function(){
     display.textContent = '';
-    result = operate(operand1, operator, operand2);
+    makeResult();
+    display.textContent = result;
+    operand1 = result;
+    operand2 = '';
+    operator = '';
+} )
 
+
+function makeResult(){
+    result = operate(operand1, operator, operand2);
     //если у числа слишком большой остаток, обрезаем его
     let strResult = result.toString();
     if ( strResult.indexOf('.') != -1) { 
@@ -47,17 +76,11 @@ equal.addEventListener('click', function(){
         if (reminder > 9999) result = result.toFixed(4);
     }
     //
-
     if (result > 99999999){
         cleanEverything();
         display.textContent = "too big number";
     };
-
-    display.textContent = result;
-    operand1 = result;
-    operand2 = '';
-    operator = '';
-} )
+}
 
 cleanScr.addEventListener('click', function(){
     cleanEverything();
@@ -90,7 +113,6 @@ function addDot(operand){
         return operand;
     };
     operand = operand + '.';
-    console.log(operand);
     return operand;
 }
 
@@ -111,10 +133,6 @@ function cutLastNumber(operand){
     return operand;
 }
 
-let operand1 = '';
-let operator;
-let operand2 = '';
-let result;
 
 function add(operand1, operand2){
     return operand1 + operand2;
